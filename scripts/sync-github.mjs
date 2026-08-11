@@ -14,6 +14,7 @@ try {
 
   execSync('git config user.name "Silah-e-Khair Bot"', { stdio: 'inherit' });
   execSync('git config user.email "bot@silahekhair.org"', { stdio: 'inherit' });
+  execSync('git branch -M main', { stdio: 'inherit' });
 
   const remoteUrl = `https://x-access-token:${token}@github.com/${repo}.git`;
   execSync(`git remote set-url origin "${remoteUrl}"`, { stdio: 'pipe' });
