@@ -106,21 +106,30 @@ export async function dbAddMember(member: Omit<MemberRecord, 'id'>, customId?: s
 
   if (!assignId) {
     try {
-      const { data: generatedId, error: generatorError } = await supabase.rpc('next_member_id');
-      if (!generatorError && typeof generatedId === 'string' && generatedId) {
-        assignId = generatedId;
-      }
-    } catch {
-      // ignore
-    }
+      const { data: existingApps } = await supabase.from('membership_applications').select('app_code');
+      const { data: existingMembers } = await supabase.from('members').select('member_id');
 
-    if (!assignId) {
-      const existingMembers = await dbGetMembers();
-      const skfNums = existingMembers
-        .map(m => parseInt(String(m.id).replace(/[^\d]/g, ''), 10))
-        .filter(n => !isNaN(n));
-      const maxNum = skfNums.length > 0 ? Math.max(...skfNums) : 0;
-      assignId = `SKF-${String(maxNum + 1).padStart(4, '0')}`;
+      const usedNums = new Set<number>();
+      if (existingApps) {
+        existingApps.forEach((a: any) => {
+          const num = parseInt(String(a.app_code || '').replace(/[^\d]/g, ''), 10);
+          if (!isNaN(num)) usedNums.add(num);
+        });
+      }
+      if (existingMembers) {
+        existingMembers.forEach((m: any) => {
+          const num = parseInt(String(m.member_id || '').replace(/[^\d]/g, ''), 10);
+          if (!isNaN(num)) usedNums.add(num);
+        });
+      }
+
+      let nextNum = 1;
+      while (usedNums.has(nextNum)) {
+        nextNum++;
+      }
+      assignId = `SKF-${String(nextNum).padStart(4, '0')}`;
+    } catch {
+      assignId = `SKF-0001`;
     }
   }
 
@@ -227,33 +236,77 @@ export async function dbGetApplications(): Promise<MembershipApplication[]> {
 
 export async function dbAddApplication(app: Omit<MembershipApplication, 'id' | 'date' | 'status'>): Promise<{ success: boolean; data?: MembershipApplication; error?: string }> {
   try {
-    const { data, error } = await supabase.rpc('submit_membership_application', {
-      p_full_name: app.fullName,
-      p_phone: app.phone,
-      p_email: app.email || null,
-      p_city: app.city || 'Karachi',
-      p_monthly_pledge: app.pledgedAmount,
-      p_occupation: app.occupation || null,
-      p_reference_name: app.reference || null,
-      p_motivation: app.motivation || null,
-      p_password: app.password || 'member123'
-    });
+    const { data: existingApps } = await supabase.from('membership_applications').select('app_code');
+    const { data: existingMembers } = await supabase.from('members').select('member_id');
 
-    if (error) {
-      console.warn('dbAddApplication error:', error);
-      return { success: false, error: error.message };
+    const usedNums = new Set<number>();
+    if (existingApps) {
+      existingApps.forEach((a: any) => {
+        const num = parseInt(String(a.app_code || '').replace(/[^\d]/g, ''), 10);
+        if (!isNaN(num)) usedNums.add(num);
+      });
+    }
+    if (existingMembers) {
+      existingMembers.forEach((m: any) => {
+        const num = parseInt(String(m.member_id || '').replace(/[^\d]/g, ''), 10);
+        if (!isNaN(num)) usedNums.add(num);
+      });
     }
 
-    const row = Array.isArray(data) ? data[0] : data;
-    const appCode = row?.app_code;
-    if (typeof appCode !== 'string' || !appCode) {
-      return { success: false, error: 'The membership application was saved without a sequential Member ID.' };
+    let nextNum = 1;
+    while (usedNums.has(nextNum)) {
+      nextNum++;
+    }
+    const assignedId = `SKF-${String(nextNum).padStart(4, '0')}`;
+
+    const payload = {
+      app_code: assignedId,
+      full_name: app.fullName,
+      phone: app.phone,
+      email: app.email || null,
+      city: app.city || 'Karachi',
+      monthly_pledge: app.pledgedAmount,
+      occupation: app.occupation || null,
+      reference_name: app.reference || null,
+      motivation: app.motivation || null,
+      password: app.password || 'member123',
+      status: 'pending'
+    };
+
+    let insertedRow: any = null;
+    const { data: insertRes, error: insertErr } = await supabase
+      .from('membership_applications')
+      .insert([payload])
+      .select()
+      .maybeSingle();
+
+    if (!insertErr && insertRes) {
+      insertedRow = insertRes;
+    } else {
+      const { data: rpcData, error: rpcErr } = await supabase.rpc('submit_membership_application', {
+        p_full_name: app.fullName,
+        p_phone: app.phone,
+        p_email: app.email || null,
+        p_city: app.city || 'Karachi',
+        p_monthly_pledge: app.pledgedAmount,
+        p_occupation: app.occupation || null,
+        p_reference_name: app.reference || null,
+        p_motivation: app.motivation || null,
+        p_password: app.password || 'member123'
+      });
+
+      if (rpcErr) {
+        console.warn('dbAddApplication error:', rpcErr);
+        return { success: false, error: rpcErr.message };
+      }
+      insertedRow = Array.isArray(rpcData) ? rpcData[0] : rpcData;
     }
 
+    const appCode = insertedRow?.app_code || assignedId;
     const created: MembershipApplication = {
       ...app,
       id: appCode,
-      date: row?.created_at ? new Date(row.created_at).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) : 'Today',
+      date: insertedRow?.created_at ? new Date(insertedRow.created_at).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) : 'Today',
       status: 'pending',
       password: app.password || 'member123'
     };
