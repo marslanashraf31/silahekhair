@@ -64,24 +64,22 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-    next_number BIGINT;
+    next_num INT := 1;
     candidate VARCHAR(50);
 BEGIN
-    IF (auth.jwt() -> 'app_metadata' ->> 'role') <> 'admin' THEN
-        RAISE EXCEPTION 'Only admin users can generate member IDs';
-    END IF;
-
     PERFORM pg_advisory_xact_lock(hashtext('silah_member_id_sequence'));
 
     LOOP
-        next_number := nextval('public.member_id_seq');
-        candidate := 'SKF-' || lpad(next_number::TEXT, 4, '0');
+        candidate := 'SKF-' || lpad(next_num::TEXT, 4, '0');
 
         EXIT WHEN NOT EXISTS (
-            SELECT 1
-            FROM public.members
-            WHERE member_id = candidate
+            SELECT 1 FROM public.members WHERE member_id = candidate
+        )
+        AND NOT EXISTS (
+            SELECT 1 FROM public.membership_applications WHERE app_code = candidate
         );
+
+        next_num := next_num + 1;
     END LOOP;
 
     RETURN candidate;
@@ -133,7 +131,7 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-    next_number BIGINT;
+    next_num INT := 1;
     assigned_id VARCHAR(50);
 BEGIN
     IF NULLIF(trim(p_full_name), '') IS NULL OR NULLIF(trim(p_phone), '') IS NULL THEN
@@ -143,8 +141,7 @@ BEGIN
     PERFORM pg_advisory_xact_lock(hashtext('silah_member_id_sequence'));
 
     LOOP
-        next_number := nextval('public.member_id_seq');
-        assigned_id := 'SKF-' || lpad(next_number::TEXT, 4, '0');
+        assigned_id := 'SKF-' || lpad(next_num::TEXT, 4, '0');
 
         EXIT WHEN NOT EXISTS (
             SELECT 1 FROM public.members WHERE member_id = assigned_id
@@ -152,6 +149,8 @@ BEGIN
         AND NOT EXISTS (
             SELECT 1 FROM public.membership_applications WHERE app_code = assigned_id
         );
+
+        next_num := next_num + 1;
     END LOOP;
 
     RETURN QUERY
