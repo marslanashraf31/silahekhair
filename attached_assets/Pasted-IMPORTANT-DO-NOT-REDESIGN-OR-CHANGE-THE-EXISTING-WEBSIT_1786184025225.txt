@@ -1,0 +1,43 @@
+IMPORTANT — DO NOT REDESIGN OR CHANGE THE EXISTING WEBSITE.
+
+Prepare this project so it can be exported as a ZIP and imported into a completely new Google AI Studio account and still run correctly.
+
+Fix ONLY portability/build issues.
+
+Requirements:
+
+1. Make sure the complete React/Vite source code is self-contained.
+2. Fix all broken/missing imports and incorrect file paths.
+3. Fix any imports referring to files that do not exist, especially Supabase client imports.
+4. Make sure package.json contains every required dependency exactly once.
+5. Remove duplicate dependency declarations.
+6. Make sure all required configuration files are included.
+7. Make sure the project does NOT depend on the previous Google AI Studio account/session/workspace.
+8. Do NOT hardcode or remove Supabase credentials.
+9. Keep Supabase configuration using environment variables:
+   VITE_SUPABASE_URL
+   VITE_SUPABASE_PUBLISHABLE_KEY
+10. Do NOT put Supabase service-role/secret keys in frontend code.
+11. Make sure all existing public website pages, Admin Portal, Member Portal, Supabase integration, routing, images, SVG/logo assets and components remain intact.
+12. Do NOT remove existing features just to make the build pass.
+13. Do NOT redesign any page.
+14. Do NOT replace real functionality with mock/demo data.
+15. Make sure npm/bun install followed by the normal Vite start/build process works without import errors.
+16. Make the SVG/logo assets portable and ensure their paths work after ZIP extraction and re-import.
+17. Check for Google AI Studio-specific absolute paths or files and replace them with portable project-relative paths where necessary.
+
+IMPORTANT:
+Preserve the existing application exactly as much as possible.
+Only make changes required for portability, dependency resolution, missing imports, configuration and build/runtime errors.
+
+After making the fixes, verify the project starts successfully.
+
+Final response must only report:
+- Files changed
+- Build/run status
+- Any environment variables that a NEW Google AI Studio account must configure
+- Any remaining issue
+
+Do NOT add new features.
+Do NOT redesign.
+Do NOT modify the Supabase database/schema.

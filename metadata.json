@@ -1,0 +1,6 @@
+{
+  "name": "Silah-e-Khair Foundation",
+  "description": "Official public website of Silah-e-Khair Foundation - Connecting Hearts Through Giving.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,26 @@
+name: Unzip Archive
+
+on:
+  workflow_dispatch:
+
+jobs:
+  unpack:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Extract Zip
+        run: |
+          rm -rf extracted-folder
+          mkdir -p extracted-folder
+          unzip -o "silah-e-khair-foundation.zip" -d extracted-folder
+
+      - name: Commit Files
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add extracted-folder
+          git commit -m "Extracted zip content automatically" || exit 0
+          git push
