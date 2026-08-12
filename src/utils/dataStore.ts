@@ -341,8 +341,12 @@ export const deleteMemberRecord = async (
     return { success: false, error };
   }
 
-  const current = getMembersList();
-  saveMembersList(current.filter(m => m.id !== id));
+  const currentMembers = getMembersList();
+  saveMembersList(currentMembers.filter(m => m.id !== id));
+
+  const currentApps = getApplications();
+  saveApplications(currentApps.filter(a => a.id !== id));
+
   return { success: true };
 };
 

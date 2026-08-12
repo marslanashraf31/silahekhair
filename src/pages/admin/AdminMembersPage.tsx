@@ -104,9 +104,19 @@ export const AdminMembersPage: React.FC = () => {
     setDeletingMember({ id, name });
   };
 
-  const confirmDeleteMember = () => {
+  const confirmDeleteMember = async () => {
     if (deletingMember) {
-      deleteMemberRecord(deletingMember.id);
+      const res = await deleteMemberRecord(deletingMember.id);
+      if (res.success) {
+        addAuditLog({
+          adminName: 'Admin Coordinator',
+          action: 'Deleted Member Record',
+          module: 'Members',
+          recordId: deletingMember.id,
+          reason: `Permanently deleted member ${deletingMember.name} (${deletingMember.id})`,
+          status: 'warning'
+        });
+      }
       setDeletingMember(null);
     }
   };

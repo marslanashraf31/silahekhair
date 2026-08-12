@@ -20,7 +20,15 @@ function buildCodeOrIdFilter(codeColumn: string, id: string): string {
   if (isUuidString(id)) {
     return `${codeColumn}.eq.${id},id.eq.${id}`;
   }
-  return `${codeColumn}.eq.${id}`;
+  return `${codeColumn}.eq.${id},${codeColumn}.eq.${id}`;
+}
+
+function applyCodeOrIdFilter(query: any, codeColumn: string, id: string): any {
+  if (!id) return query;
+  if (isUuidString(id)) {
+    return query.or(`${codeColumn}.eq.${id},id.eq.${id}`);
+  }
+  return query.eq(codeColumn, id);
 }
 
 // ================= MEMBERS =================
@@ -230,8 +238,14 @@ export async function dbUpdateMember(member: MemberRecord): Promise<{ success: b
 
 export async function dbDeleteMember(id: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const { error } = await supabase.from('members').delete().or(buildCodeOrIdFilter('member_id', id));
-    if (error) return { success: false, error: error.message };
+    const q1 = supabase.from('members').delete();
+    const { error: err1 } = await applyCodeOrIdFilter(q1, 'member_id', id);
+    if (err1) console.warn('dbDeleteMember members delete error:', err1);
+
+    const q2 = supabase.from('membership_applications').delete();
+    const { error: err2 } = await applyCodeOrIdFilter(q2, 'app_code', id);
+    if (err2) console.warn('dbDeleteMember apps delete error:', err2);
+
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err?.message || 'Database delete failed' };
