@@ -548,8 +548,22 @@ export async function dbGetContributions(): Promise<ContributionRecord[]> {
   }
 }
 
+export async function generateNextContributionCode(): Promise<string> {
+  const { data: existing } = await supabase.from('contributions').select('contribution_code');
+  const existingSet = new Set((existing || []).map((c: any) => c.contribution_code).filter(Boolean));
+
+  let num = 1;
+  while (true) {
+    const candidate = `CTR-${String(num).padStart(4, '0')}`;
+    if (!existingSet.has(candidate)) {
+      return candidate;
+    }
+    num++;
+  }
+}
+
 export async function dbAddContribution(record: Omit<ContributionRecord, 'id'> & { id?: string }): Promise<{ success: boolean; data?: ContributionRecord; error?: string }> {
-  const ctrCode = record.id || record.contributionCode || `CTR-${Math.floor(80000 + Math.random() * 90000)}`;
+  const ctrCode = record.id || record.contributionCode || await generateNextContributionCode();
 
   const payload: any = {
     contribution_code: ctrCode,
@@ -660,8 +674,22 @@ export async function dbGetExpenses(): Promise<ExpenseRecord[]> {
   }
 }
 
+export async function generateNextExpenseCode(): Promise<string> {
+  const { data: existing } = await supabase.from('expenses').select('expense_code');
+  const existingSet = new Set((existing || []).map((e: any) => e.expense_code).filter(Boolean));
+
+  let num = 1;
+  while (true) {
+    const candidate = `EXP-${String(num).padStart(4, '0')}`;
+    if (!existingSet.has(candidate)) {
+      return candidate;
+    }
+    num++;
+  }
+}
+
 export async function dbAddExpense(record: Omit<ExpenseRecord, 'id'>): Promise<{ success: boolean; data?: ExpenseRecord; error?: string }> {
-  const expCode = `EXP-${Math.floor(1000 + Math.random() * 8999)}`;
+  const expCode = await generateNextExpenseCode();
   const payload = {
     expense_code: expCode,
     category: record.category,
@@ -768,8 +796,22 @@ export async function dbGetEvents(): Promise<EventItem[]> {
   }
 }
 
+export async function generateNextEventCode(): Promise<string> {
+  const { data: existing } = await supabase.from('events').select('event_code');
+  const existingSet = new Set((existing || []).map((e: any) => e.event_code).filter(Boolean));
+
+  let num = 1;
+  while (true) {
+    const candidate = `EVT-${String(num).padStart(4, '0')}`;
+    if (!existingSet.has(candidate)) {
+      return candidate;
+    }
+    num++;
+  }
+}
+
 export async function dbAddEvent(eventData: Omit<EventItem, 'id' | 'registrations'>): Promise<{ success: boolean; data?: EventItem; error?: string }> {
-  const evtCode = `EVT-${Math.floor(200 + Math.random() * 9000)}`;
+  const evtCode = await generateNextEventCode();
   const payload = {
     event_code: evtCode,
     title: eventData.title,
@@ -1017,8 +1059,22 @@ export async function dbGetGalleryItems(): Promise<any[]> {
   }
 }
 
+export async function generateNextGalleryCode(): Promise<string> {
+  const { data: existing } = await supabase.from('gallery').select('gallery_code');
+  const existingSet = new Set((existing || []).map((g: any) => g.gallery_code).filter(Boolean));
+
+  let num = 1;
+  while (true) {
+    const candidate = `GAL-${String(num).padStart(4, '0')}`;
+    if (!existingSet.has(candidate)) {
+      return candidate;
+    }
+    num++;
+  }
+}
+
 export async function dbAddGalleryItem(item: any): Promise<{ success: boolean; data?: any; error?: string }> {
-  const galCode = `GAL-${Math.floor(1000 + Math.random() * 8999)}`;
+  const galCode = await generateNextGalleryCode();
   const payload = {
     gallery_code: galCode,
     title: item.title,
@@ -1099,8 +1155,22 @@ export async function dbGetUpdateArticles(): Promise<any[]> {
   }
 }
 
+export async function generateNextUpdateCode(): Promise<string> {
+  const { data: existing } = await supabase.from('updates').select('article_code');
+  const existingSet = new Set((existing || []).map((u: any) => u.article_code).filter(Boolean));
+
+  let num = 1;
+  while (true) {
+    const candidate = `UP-${String(num).padStart(4, '0')}`;
+    if (!existingSet.has(candidate)) {
+      return candidate;
+    }
+    num++;
+  }
+}
+
 export async function dbAddUpdateArticle(article: any): Promise<{ success: boolean; data?: any; error?: string }> {
-  const artCode = `UP-${Math.floor(1000 + Math.random() * 8999)}`;
+  const artCode = await generateNextUpdateCode();
   const dateStr = article.date || new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
   const payload = {
     article_code: artCode,
@@ -1188,8 +1258,22 @@ export async function dbGetPrograms(): Promise<any[]> {
   }
 }
 
+export async function generateNextProgramCode(): Promise<string> {
+  const { data: existing } = await supabase.from('programs').select('program_code');
+  const existingSet = new Set((existing || []).map((p: any) => p.program_code).filter(Boolean));
+
+  let num = 1;
+  while (true) {
+    const candidate = `PRG-${String(num).padStart(4, '0')}`;
+    if (!existingSet.has(candidate)) {
+      return candidate;
+    }
+    num++;
+  }
+}
+
 export async function dbAddProgram(program: any): Promise<{ success: boolean; data?: any; error?: string }> {
-  const progCode = `PRG-${Math.floor(100 + Math.random() * 899)}`;
+  const progCode = await generateNextProgramCode();
   const payload = {
     program_code: progCode,
     title: program.title,
