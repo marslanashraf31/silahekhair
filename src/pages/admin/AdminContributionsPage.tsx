@@ -21,10 +21,17 @@ export const AdminContributionsPage: React.FC = () => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   // Manual Add Modal State
+  const currentMonthString = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  const monthOptions = Array.from({ length: 12 }, (_, i) => {
+    const d = new Date();
+    d.setMonth(d.getMonth() - i);
+    return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  });
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [memberId, setMemberId] = useState('');
   const [memberName, setMemberName] = useState('');
-  const [month, setMonth] = useState('Aug 2026');
+  const [month, setMonth] = useState(currentMonthString);
   const [amount, setAmount] = useState(1000);
   const [paymentMethod, setPaymentMethod] = useState<'NayaPay' | 'Bank Transfer' | 'EasyPaisa' | 'JazzCash' | 'Cash'>('NayaPay');
   const [reference, setReference] = useState('');
@@ -401,16 +408,19 @@ export const AdminContributionsPage: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                    Billing Month
+                    Billing Month *
                   </label>
-                  <input
-                    type="text"
-                    required
+                  <select
                     value={month}
                     onChange={(e) => setMonth(e.target.value)}
-                    placeholder="e.g. Aug 2026"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-sans text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#047857]"
-                  />
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-bold text-[#064E3B] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#047857] cursor-pointer"
+                  >
+                    {monthOptions.map((mOpt, idx) => (
+                      <option key={mOpt} value={mOpt}>
+                        {mOpt} {idx === 0 ? '(Current Month)' : ''}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>

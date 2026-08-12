@@ -1,11 +1,10 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { NavLink, Link } from 'react-router-dom';
-import { X, Heart, MessageSquare, Home, Info, FolderHeart, ShieldCheck, PhoneCall, ChevronRight, Layers, Newspaper, LogIn } from 'lucide-react';
+import { X, Heart, Home, Info, FolderHeart, ShieldCheck, PhoneCall, ChevronRight, Layers, Newspaper, LogIn } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { SITE_CONFIG } from '../../config/siteConfig';
 import { FoundationLogo } from './FoundationLogo';
-import { PrimaryButton } from './PrimaryButton';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -109,48 +108,27 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
           </div>
 
           {/* Footer CTAs at the bottom of the mobile screen */}
-          <div className="p-4 sm:p-5 bg-white border-t border-[#047857]/15 shrink-0 space-y-2.5">
-            <button
-              onClick={() => {
-                onClose();
-                if (onOpenDonate) onOpenDonate();
-              }}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-sans font-extrabold text-sm text-white bg-rose-600 hover:bg-rose-700 shadow-md transition-all cursor-pointer border border-rose-700"
-            >
-              <Heart className="w-4 h-4 fill-current text-white" />
-              <span>Donate Now</span>
-            </button>
+          <div className="p-3 sm:p-4 bg-white border-t border-[#047857]/15 shrink-0">
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenMembership();
+                }}
+                className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#047857] hover:bg-[#064E3B] text-white font-sans font-bold text-xs shadow-2xs transition-colors cursor-pointer"
+              >
+                <span>Become Member</span>
+              </button>
 
-            <PrimaryButton
-              fullWidth
-              size="lg"
-              onClick={() => {
-                onClose();
-                onOpenMembership();
-              }}
-              className="font-serif shadow-xs py-2.5 text-sm"
-            >
-              Become a Contributing Member
-            </PrimaryButton>
-
-            <Link
-              to="/member/login"
-              onClick={onClose}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-50 text-[#064E3B] font-sans font-bold text-xs border border-[#047857]/25 hover:bg-emerald-100 transition-colors"
-            >
-              <LogIn className="w-4 h-4 text-[#047857]" />
-              <span>Member Portal Login</span>
-            </Link>
-
-            <a
-              href={`https://wa.me/${SITE_CONFIG.whatsappRaw}?text=${encodeURIComponent(SITE_CONFIG.whatsappMessages.general)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366] text-white font-sans font-bold text-sm hover:bg-[#20BD5A] transition-colors shadow-xs"
-            >
-              <MessageSquare className="w-4 h-4 fill-current" />
-              <span>WhatsApp Coordinator ({SITE_CONFIG.whatsappNumber})</span>
-            </a>
+              <Link
+                to="/member/login"
+                onClick={onClose}
+                className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-emerald-50 text-[#064E3B] font-sans font-bold text-xs border border-[#047857]/25 hover:bg-emerald-100 transition-colors"
+              >
+                <LogIn className="w-3.5 h-3.5 text-[#047857] shrink-0" />
+                <span>Member Login</span>
+              </Link>
+            </div>
           </div>
         </motion.div>
       )}

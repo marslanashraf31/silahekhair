@@ -28,8 +28,15 @@ export const MemberContributionsPage: React.FC = () => {
   const currentPledge = getPledgeAmount();
 
   // Modal State
+  const currentMonthString = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const monthOptions = Array.from({ length: 12 }, (_, i) => {
+    const d = new Date();
+    d.setMonth(d.getMonth() - i);
+    return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  });
+
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
-  const [month, setMonth] = useState(new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
+  const [month, setMonth] = useState(currentMonthString);
   const [amount, setAmount] = useState<number>(currentPledge);
   const [paymentMethod, setPaymentMethod] = useState<'Bank Transfer' | 'EasyPaisa' | 'JazzCash' | 'NayaPay' | 'Cash'>('NayaPay');
   const [senderAccountName, setSenderAccountName] = useState('');
@@ -308,15 +315,19 @@ export const MemberContributionsPage: React.FC = () => {
             <form onSubmit={handleSubmitContribution} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Billing Month
+                  Billing Month *
                 </label>
-                <input
-                  type="text"
-                  required
+                <select
                   value={month}
                   onChange={e => setMonth(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none"
-                />
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-[#064E3B] focus:outline-none focus:ring-2 focus:ring-[#047857] cursor-pointer"
+                >
+                  {monthOptions.map((mOpt, idx) => (
+                    <option key={mOpt} value={mOpt}>
+                      {mOpt} {idx === 0 ? '(Current Month)' : ''}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
