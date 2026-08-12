@@ -154,6 +154,36 @@ export async function dbAddMember(member: Omit<MemberRecord, 'id'>, customId?: s
       delete payload.password;
       res = await supabase.from('members').insert([payload]).select();
     }
+    if (res.error && (res.error.message.includes('duplicate key') || res.error.message.includes('unique constraint') || res.error.message.includes('members_member_id_key'))) {
+      const { data: existing } = await supabase
+        .from('members')
+        .select('*')
+        .eq('member_id', assignId)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase
+          .from('members')
+          .update({ membership_status: member.status || 'active', updated_at: new Date().toISOString() })
+          .eq('member_id', assignId);
+
+        const updatedMember: MemberRecord = {
+          ...member,
+          id: existing.member_id || assignId,
+          name: existing.full_name || member.name,
+          phone: existing.phone || member.phone || '',
+          email: existing.email || member.email || '',
+          city: existing.city || member.city || 'Karachi',
+          status: existing.membership_status || 'active',
+          joinedDate: existing.join_date || member.joinedDate || 'Recent',
+          monthlyContribution: existing.monthly_pledge || member.monthlyContribution || 'PKR 300 / month',
+          level: existing.level || member.level || 'ACTIVE MEMBER',
+          points: Number(existing.points || member.points || 0),
+          password: existing.password || member.password || 'member123'
+        };
+        return { success: true, data: updatedMember };
+      }
+    }
     if (res.error) {
       console.warn('dbAddMember error:', res.error);
       return { success: false, error: res.error.message };
@@ -317,7 +347,7 @@ export async function dbAddApplication(app: Omit<MembershipApplication, 'id' | '
   }
 }
 
-export async function dbApproveApplication(appId: string): Promise<{ success: boolean; error?: string }> {
+export async function dbApproveApplication(appId: string): Promise<{ success: boolean; data?: MemberRecord; error?: string }> {
   try {
     const { data: updatedApp, error: appErr } = await supabase
       .from('membership_applications')
@@ -338,20 +368,30 @@ export async function dbApproveApplication(appId: string): Promise<{ success: bo
       appRecord = fetchedApp;
     }
 
+    if (!appRecord) {
+      return { success: false, error: 'Application not found' };
+    }
+
+    const assignedMemberId = appRecord.app_code || appId;
+
+    let memberRow: any = null;
     const { data: existingMember } = await supabase
       .from('members')
       .select('*')
-      .or(buildCodeOrIdFilter('member_id', appId))
+      .or(`member_id.eq.${assignedMemberId},member_id.eq.${appId}`)
       .maybeSingle();
 
     if (existingMember) {
-      await supabase
+      const { data: updatedMember } = await supabase
         .from('members')
         .update({ membership_status: 'active', updated_at: new Date().toISOString() })
-        .or(buildCodeOrIdFilter('member_id', appId));
-    } else if (appRecord) {
+        .eq('member_id', existingMember.member_id)
+        .select()
+        .maybeSingle();
+      memberRow = updatedMember || existingMember;
+    } else {
       const memberPayload: any = {
-        member_id: appRecord.app_code || appId,
+        member_id: assignedMemberId,
         full_name: appRecord.full_name,
         phone: appRecord.phone || '',
         email: appRecord.email || null,
@@ -365,14 +405,40 @@ export async function dbApproveApplication(appId: string): Promise<{ success: bo
         password: appRecord.password || 'member123'
       };
 
-      let insertRes = await supabase.from('members').insert([memberPayload]);
+      let insertRes = await supabase.from('members').insert([memberPayload]).select().maybeSingle();
       if (insertRes.error && insertRes.error.message.includes('column')) {
         delete memberPayload.password;
-        await supabase.from('members').insert([memberPayload]);
+        insertRes = await supabase.from('members').insert([memberPayload]).select().maybeSingle();
+      }
+
+      if (insertRes.data) {
+        memberRow = insertRes.data;
+      } else {
+        const { data: reCheck } = await supabase
+          .from('members')
+          .select('*')
+          .eq('member_id', assignedMemberId)
+          .maybeSingle();
+        memberRow = reCheck;
       }
     }
 
-    return { success: true };
+    const createdMember: MemberRecord = {
+      id: memberRow?.member_id || assignedMemberId,
+      name: memberRow?.full_name || appRecord.full_name,
+      phone: memberRow?.phone || appRecord.phone || '',
+      email: memberRow?.email || appRecord.email || '',
+      city: memberRow?.city || appRecord.city || 'Karachi',
+      status: 'active',
+      joinedDate: memberRow?.join_date || 'Recent',
+      monthlyContribution: memberRow?.monthly_pledge || appRecord.monthly_pledge || 'PKR 300 / month',
+      level: memberRow?.level || 'ACTIVE MEMBER',
+      points: Number(memberRow?.points || 0),
+      achievements: memberRow?.achievements || ['New Member'],
+      password: memberRow?.password || appRecord.password || 'member123'
+    };
+
+    return { success: true, data: createdMember };
   } catch (err: any) {
     return { success: false, error: err?.message || 'Approve operation failed' };
   }

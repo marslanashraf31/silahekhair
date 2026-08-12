@@ -408,40 +408,60 @@ export const approveApplication = async (
   const updatedApps = apps.map(a => a.id === appId ? { ...a, status: 'approved' as const } : a);
   saveApplications(updatedApps);
 
-  const currentMembers = getMembersList();
-  const existingMember = currentMembers.find(m => m.id === targetApp.id);
   let finalMember: MemberRecord;
 
-  if (existingMember) {
-    finalMember = { 
-      ...existingMember, 
-      status: 'active', 
-      level: 'ACTIVE MEMBER',
-      password: targetApp.password || existingMember.password || 'member123'
-    };
-    const updateMemberResult = await updateMemberRecord(finalMember);
-    if (!updateMemberResult.success) {
-      return {
-        success: false,
-        error: updateMemberResult.error || 'Application was approved, but the member record could not be updated.'
-      };
+  if (dbRes.data) {
+    finalMember = dbRes.data;
+    const currentMembers = getMembersList();
+    const existingIdx = currentMembers.findIndex(m => m.id === finalMember.id);
+    if (existingIdx >= 0) {
+      currentMembers[existingIdx] = finalMember;
+    } else {
+      currentMembers.unshift(finalMember);
     }
+    saveMembersList(currentMembers);
   } else {
-    const addRes = await addMemberRecord({
-      name: targetApp.fullName,
-      phone: targetApp.phone,
-      email: targetApp.email,
-      city: targetApp.city || 'Karachi',
-      status: 'active',
-      joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-      monthlyContribution: targetApp.pledgedAmount,
-      password: targetApp.password || 'member123'
-    }, targetApp.id.startsWith('SKF-') ? targetApp.id : undefined);
+    const currentMembers = getMembersList();
+    const existingMember = currentMembers.find(m => m.id === targetApp.id);
 
-    if (!addRes.success || !addRes.data) {
-      return { success: false, error: addRes.error || 'Failed to create member record on approval.' };
+    if (existingMember) {
+      finalMember = { 
+        ...existingMember, 
+        status: 'active', 
+        level: 'ACTIVE MEMBER',
+        password: targetApp.password || existingMember.password || 'member123'
+      };
+      await updateMemberRecord(finalMember);
+    } else {
+      const addRes = await addMemberRecord({
+        name: targetApp.fullName,
+        phone: targetApp.phone,
+        email: targetApp.email,
+        city: targetApp.city || 'Karachi',
+        status: 'active',
+        joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+        monthlyContribution: targetApp.pledgedAmount,
+        password: targetApp.password || 'member123'
+      }, targetApp.id.startsWith('SKF-') ? targetApp.id : undefined);
+
+      if (addRes.data) {
+        finalMember = addRes.data;
+      } else {
+        finalMember = {
+          id: targetApp.id,
+          name: targetApp.fullName,
+          phone: targetApp.phone,
+          email: targetApp.email,
+          city: targetApp.city || 'Karachi',
+          status: 'active',
+          joinedDate: 'Recent',
+          monthlyContribution: targetApp.pledgedAmount,
+          level: 'ACTIVE MEMBER',
+          points: 0,
+          password: targetApp.password || 'member123'
+        };
+      }
     }
-    finalMember = addRes.data;
   }
 
   await addNotification({
