@@ -59,7 +59,7 @@ export const ImpactPage: React.FC<ImpactPageProps> = ({ onOpenMembership }) => {
                 </div>
 
                 <div className="font-serif text-3xl md:text-4xl font-bold text-[#064E3B]">
-                  {metric.value}
+                  {metric.id === 'members' ? memberCount : metric.value}
                 </div>
 
                 <h3 className="font-sans text-sm font-bold text-[#1E293B]">

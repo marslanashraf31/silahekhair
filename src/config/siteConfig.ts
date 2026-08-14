@@ -17,7 +17,7 @@ export const SITE_CONFIG = {
   // Public fallback used until live member records are available from Supabase.
   // Keep this in source control because browser localStorage is not shared with
   // visitors on Vercel.
-  activeMembersCount: '3+',
+  activeMembersCount: '9+',
 
   // Navigation Links
   navItems: [

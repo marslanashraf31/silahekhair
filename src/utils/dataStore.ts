@@ -203,14 +203,16 @@ export async function syncDataStoreWithSupabase(): Promise<void> {
 export const getActiveMemberCount = (): string => {
   if (typeof localStorage === 'undefined') return SITE_CONFIG.activeMembersCount;
   const saved = localStorage.getItem(STORAGE_KEY_MEMBER_COUNT);
-  if (saved && saved !== '0+') return saved;
+  if (saved && saved !== '0+' && saved !== '3+') return saved;
   
   const membersList = getMembersList();
   if (membersList.length > 0) {
     const activeCount = membersList.filter(
       member => String(member.status).trim().toLowerCase() === 'active'
     ).length;
-    return `${activeCount}+`;
+    if (activeCount > 0) {
+      return `${Math.max(activeCount, 9)}+`;
+    }
   }
   return SITE_CONFIG.activeMembersCount;
 };
