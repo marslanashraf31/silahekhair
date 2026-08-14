@@ -710,8 +710,22 @@ export async function dbUpdateContribution(id: string, updates: Partial<Contribu
     if (updates.paymentMethod !== undefined) payload.payment_method = updates.paymentMethod;
     if (updates.status !== undefined) payload.status = updates.status;
     if (updates.notes !== undefined) payload.notes = updates.notes;
+    if (updates.memberName !== undefined) payload.member_name = updates.memberName;
+    if (updates.senderAccountName !== undefined) payload.sender_account_name = updates.senderAccountName;
+    if (updates.senderAccountNumber !== undefined) payload.sender_account_number = updates.senderAccountNumber;
+    if (updates.paymentDate !== undefined) payload.payment_date = updates.paymentDate;
+    if (updates.receiptReference !== undefined) payload.receipt_reference = updates.receiptReference;
+    if (updates.receiptImage !== undefined) payload.receipt_image = updates.receiptImage;
+    if (updates.submissionType !== undefined) payload.submission_type = updates.submissionType;
 
-    const { error } = await supabase.from('contributions').update(payload).or(buildCodeOrIdFilter('contribution_code', id));
+    let { error } = await supabase.from('contributions').update(payload).or(buildCodeOrIdFilter('contribution_code', id));
+    if (error && error.message.includes('column')) {
+      delete payload.submission_type;
+      delete payload.sender_account_name;
+      delete payload.sender_account_number;
+      const retry = await supabase.from('contributions').update(payload).or(buildCodeOrIdFilter('contribution_code', id));
+      error = retry.error;
+    }
     if (error) return { success: false, error: error.message };
     return { success: true };
   } catch (err: any) {

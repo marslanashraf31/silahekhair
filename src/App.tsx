@@ -6,7 +6,6 @@ import { syncDataStoreWithSupabase } from './utils/dataStore';
 import { Header } from './components/common/Header';
 import { Footer } from './components/common/Footer';
 import { MembershipModal } from './components/common/MembershipModal';
-import { DonateModal } from './components/common/DonateModal';
 import { WhatsAppButton } from './components/common/WhatsAppButton';
 
 // Public Pages
@@ -53,21 +52,15 @@ const PublicLayout: React.FC<{
   onOpenMembership: () => void;
   isMembershipModalOpen: boolean;
   onCloseMembership: () => void;
-  onOpenDonate: () => void;
-  isDonateModalOpen: boolean;
-  onCloseDonate: () => void;
 }> = ({
   onOpenMembership,
   isMembershipModalOpen,
-  onCloseMembership,
-  onOpenDonate,
-  isDonateModalOpen,
-  onCloseDonate
+  onCloseMembership
 }) => {
   return (
     <div className="flex flex-col min-h-screen bg-[#FAF9F6] text-[#1E293B] antialiased selection:bg-[#047857] selection:text-white">
       {/* Sticky Public Header */}
-      <Header onOpenMembership={onOpenMembership} onOpenDonate={onOpenDonate} />
+      <Header onOpenMembership={onOpenMembership} />
 
       {/* Public Pages Main Container */}
       <main className="grow">
@@ -85,12 +78,6 @@ const PublicLayout: React.FC<{
         isOpen={isMembershipModalOpen}
         onClose={onCloseMembership}
       />
-
-      {/* Public Donation Modal */}
-      <DonateModal
-        isOpen={isDonateModalOpen}
-        onClose={onCloseDonate}
-      />
     </div>
   );
 };
@@ -105,7 +92,6 @@ const ProtectedAdminLayout: React.FC = () => {
 
 export default function App() {
   const [isMembershipModalOpen, setIsMembershipModalOpen] = useState(false);
-  const [isDonateModalOpen, setIsDonateModalOpen] = useState(false);
 
   useEffect(() => {
     syncDataStoreWithSupabase();
@@ -119,14 +105,6 @@ export default function App() {
     setIsMembershipModalOpen(false);
   };
 
-  const handleOpenDonate = () => {
-    setIsDonateModalOpen(true);
-  };
-
-  const handleCloseDonate = () => {
-    setIsDonateModalOpen(false);
-  };
-
   return (
     <BrowserRouter>
       <Routes>
@@ -138,9 +116,6 @@ export default function App() {
               onOpenMembership={handleOpenMembership}
               isMembershipModalOpen={isMembershipModalOpen}
               onCloseMembership={handleCloseMembership}
-              onOpenDonate={handleOpenDonate}
-              isDonateModalOpen={isDonateModalOpen}
-              onCloseDonate={handleCloseDonate}
             />
           }
         >

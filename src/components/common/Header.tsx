@@ -11,9 +11,14 @@ interface HeaderProps {
   onOpenDonate?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onOpenMembership, onOpenDonate }) => {
+export const Header: React.FC<HeaderProps> = ({ onOpenMembership }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const handleSupportWhatsApp = () => {
+    const url = `https://wa.me/${SITE_CONFIG.whatsappRaw}?text=${encodeURIComponent(SITE_CONFIG.whatsappMessages.support)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -64,13 +69,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMembership, onOpenDonate }
 
         {/* Header Action Buttons */}
         <div className="flex items-center space-x-1.5 sm:space-x-3">
-          {/* 1. Donate Now: Primary Button (Red) - Visible on both Mobile & Desktop */}
+          {/* 1. Support Us: Primary WhatsApp Action Button - Visible on both Mobile & Desktop */}
           <button
-            onClick={onOpenDonate}
+            onClick={handleSupportWhatsApp}
+            title="Support Silah-e-Khair Foundation via WhatsApp"
             className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl font-sans text-xs sm:text-sm font-extrabold text-white bg-rose-600 hover:bg-rose-700 shadow-xs hover:shadow-md transition-all cursor-pointer border border-rose-700 shrink-0"
           >
             <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current text-white" />
-            <span>Donate Now</span>
+            <span>Support Us</span>
           </button>
 
           {/* 2. Become a Member: Simple Outlined / Green Button - Desktop only */}
@@ -106,7 +112,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMembership, onOpenDonate }
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
         onOpenMembership={onOpenMembership}
-        onOpenDonate={onOpenDonate}
+        onOpenDonate={handleSupportWhatsApp}
       />
     </header>
   );

@@ -175,22 +175,15 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ onCloseMobile }) => 
                 to="/admin/donations"
                 onClick={onCloseMobile}
                 className={({ isActive }) =>
-                  `flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                  `flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
                     isActive
                       ? 'bg-[#047857] text-white font-bold'
                       : 'text-emerald-200/80 hover:text-white hover:bg-emerald-800/30'
                   }`
                 }
               >
-                <div className="flex items-center gap-2">
-                  <Heart className="w-3.5 h-3.5 text-rose-300 shrink-0 fill-rose-300/30" />
-                  <span>Public Donations</span>
-                </div>
-                {pendingDonationsCount > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-white text-[9px] font-extrabold">
-                    {pendingDonationsCount}
-                  </span>
-                )}
+                <Heart className="w-3.5 h-3.5 text-rose-300 shrink-0 fill-rose-300/30" />
+                <span>Public Donations</span>
               </NavLink>
 
               <NavLink

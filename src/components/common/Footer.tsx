@@ -1,20 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { MessageSquare, Instagram, LogIn, Heart } from 'lucide-react';
 import { SITE_CONFIG } from '../../config/siteConfig';
 import { FoundationLogo } from './FoundationLogo';
-import { DonateModal } from './DonateModal';
 
 interface FooterProps {
   onOpenMembership: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({ onOpenMembership }) => {
-  const [isDonateOpen, setIsDonateOpen] = useState(false);
-
   return (
-    <>
-      <footer className="bg-[#064E3B] text-white pt-16 pb-12 border-t border-[#047857]/30">
+    <footer className="bg-[#064E3B] text-white pt-16 pb-12 border-t border-[#047857]/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-6 lg:gap-12 pb-12 border-b border-emerald-800/60">
             
@@ -64,14 +60,16 @@ export const Footer: React.FC<FooterProps> = ({ onOpenMembership }) => {
               </p>
               
               <div className="space-y-2.5 pt-1">
-                {/* Big Donate Now Button */}
-                <button
-                  onClick={() => setIsDonateOpen(true)}
+                {/* Big Support Us Button -> WhatsApp */}
+                <a
+                  href={`https://wa.me/${SITE_CONFIG.whatsappRaw}?text=${encodeURIComponent(SITE_CONFIG.whatsappMessages.support)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-full flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-sm py-3 px-4 rounded-xl shadow-md transition-colors cursor-pointer"
                 >
                   <Heart className="w-4 h-4 fill-current text-rose-700" />
-                  <span>Donate Now</span>
-                </button>
+                  <span>Support Us</span>
+                </a>
 
                 {/* Become a Member Button */}
                 <button
@@ -132,9 +130,5 @@ export const Footer: React.FC<FooterProps> = ({ onOpenMembership }) => {
           </div>
         </div>
       </footer>
-
-      {/* Donate Modal Popup */}
-      <DonateModal isOpen={isDonateOpen} onClose={() => setIsDonateOpen(false)} />
-    </>
   );
 };

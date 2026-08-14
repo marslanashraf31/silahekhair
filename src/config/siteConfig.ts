@@ -34,6 +34,7 @@ export const SITE_CONFIG = {
   // Default WhatsApp Messages
   whatsappMessages: {
     general: 'Assalam-o-Alaikum, I would like to know more about Silah-e-Khair Foundation.',
+    support: 'Assalam-o-Alaikum, I would like to support Silah-e-Khair Foundation with funds/donation.',
     ourWork: 'Assalam-o-Alaikum, I would like to know more about the work of Silah-e-Khair Foundation.',
     membership: 'Assalam-o-Alaikum, I am interested in becoming a contributing member of Silah-e-Khair Foundation.',
     contact: 'Assalam-o-Alaikum, I would like to contact Silah-e-Khair Foundation.',
